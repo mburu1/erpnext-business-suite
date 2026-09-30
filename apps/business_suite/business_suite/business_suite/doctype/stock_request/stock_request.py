@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from business_suite.permissions import ensure_document_permission
 from business_suite.utils.validation import (
     require_active_business_customer,
     require_existing_link,
@@ -10,14 +11,22 @@ from business_suite.workflow import enforce_transition, record_transition
 
 
 class StockRequest(Document):
+    def before_insert(self):
+        ensure_document_permission(self, "create")
+
+    def before_save(self):
+        if not self.is_new():
+            ensure_document_permission(self, "write")
+        enforce_transition(self)
+
+    def on_trash(self):
+        ensure_document_permission(self, "delete")
+
     def validate(self):
         self._validate_header()
         self._validate_business_customer()
         self._validate_items()
         self._validate_status_requirements()
-
-    def before_save(self):
-        enforce_transition(self)
 
     def after_save(self):
         record_transition(self)
@@ -47,7 +56,9 @@ class StockRequest(Document):
 
         for row in self.items:
             if not row.business_product:
-                frappe.throw(_("Every Stock Request Item must specify a Business Product."))
+                frappe.throw(
+                    _("Every Stock Request Item must specify a Business Product.")
+                )
 
             if row.business_product in seen_products:
                 frappe.throw(
