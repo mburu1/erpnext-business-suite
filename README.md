@@ -187,7 +187,7 @@ The project will document and demonstrate:
 
 ## Testing Strategy
 
-Testing will cover multiple levels:
+Testing is enforced at multiple levels rather than relying only on end-to-end checks:
 
 ```
 Unit Tests
@@ -195,19 +195,37 @@ Unit Tests
     +-- Business rules
     +-- Validation
     +-- Utilities
+    +-- RBAC vocabulary
+    +-- Workflow policy
 
 Integration Tests
     |
     +-- DocType interactions
     +-- Database behavior
     +-- REST integrations
+    +-- Permission enforcement
 
 Workflow Tests
     |
     +-- State transitions
     +-- Permissions
     +-- Failure paths
+
+E2E / Contract Validation
+    |
+    +-- Integration boundaries
+    +-- Authentication behavior
+    +-- Optional live HTTP checks
+
+Quality Gates
+    |
+    +-- Python compilation
+    +-- Ruff linting
+    +-- Deterministic pytest suite
+    +-- Secret-literal hygiene checks
 ```
+
+The deterministic quality suite runs in GitHub Actions without requiring a live Frappe site. Frappe-backed tests remain explicit integration tests requiring a configured ERPNext/Frappe environment, so CI does not silently skip them.
 
 ## Project Structure
 
@@ -219,6 +237,7 @@ erpnext-business-suite/
 ├── .gitignore
 ├── .editorconfig
 ├── .env.example
+├── pytest.ini
 |
 ├── apps/
 │   └── business_suite/
@@ -226,6 +245,8 @@ erpnext-business-suite/
 │       │   ├── __init__.py
 │       │   ├── hooks.py
 │       │   ├── modules.txt
+│       │   ├── role_definitions.py
+│       │   ├── workflow_definitions.py
 │       │   │
 │       │   ├── api/
 │       │   ├── business_suite/
@@ -234,10 +255,6 @@ erpnext-business-suite/
 │       │   │   └── workspace/
 │       │   │
 │       │   ├── integrations/
-│       │   │   ├── clients/
-│       │   │   ├── webhooks/
-│       │   │   └── services/
-│       │   │
 │       │   ├── utils/
 │       │   └── tests/
 │       │
@@ -245,35 +262,11 @@ erpnext-business-suite/
 |
 ├── config/
 ├── database/
-│   ├── schema/
-│   ├── seed/
-│   └── docs/
 ├── frontend/
-│   ├── js/
-│   ├── html/
-│   └── css/
 ├── integrations/
-│   ├── rest/
-│   ├── webhooks/
-│   └── examples/
 ├── reports/
-│   ├── inventory/
-│   ├── accounts/
-│   ├── hr/
-│   └── crm/
 ├── docs/
-│   ├── architecture/
-│   ├── erd/
-│   ├── ooad/
-│   ├── workflows/
-│   ├── integrations/
-│   ├── security/
-│   ├── deployment/
-│   └── troubleshooting/
 ├── deployment/
-│   ├── docker/
-│   ├── nginx/
-│   └── production/
 └── .github/
     └── workflows/
 ```
@@ -370,7 +363,8 @@ GitHub Actions will be used for automated checks such as:
 
 - Python syntax and linting
 - Static validation
-- Test execution
+- Deterministic unit and quality tests
+- Integration contract validation
 - Repository structure checks
 - Configuration/secrets hygiene
 
@@ -435,6 +429,7 @@ while showing the full engineering lifecycle:
 - Security review
 - Performance analysis
 - Troubleshooting runbooks
+- Automated unit and quality gates
 
 ### Phase 7 — Deployment
 - Docker-based environment
