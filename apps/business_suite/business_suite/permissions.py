@@ -5,14 +5,15 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-ROLE_ADMIN = "Business Suite Administrator"
-ROLE_MANAGER = "Business Suite Manager"
-ROLE_SALES = "Business Suite Sales User"
-ROLE_INVENTORY = "Business Suite Inventory User"
-ROLE_INTEGRATION = "Business Suite Integration User"
-ROLE_REPORT = "Business Suite Report User"
-
-ROLES = (ROLE_ADMIN, ROLE_MANAGER, ROLE_SALES, ROLE_INVENTORY, ROLE_INTEGRATION, ROLE_REPORT)
+from business_suite.role_definitions import (
+    ROLE_ADMIN,
+    ROLE_INTEGRATION,
+    ROLE_INVENTORY,
+    ROLE_MANAGER,
+    ROLE_REPORT,
+    ROLE_SALES,
+    ROLES,
+)
 
 DOCTYPE_PERMISSIONS = {
     "Business Customer": {
