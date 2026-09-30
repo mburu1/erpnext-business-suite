@@ -66,8 +66,10 @@ def main() -> int:
     compose = (
         ROOT / "deployment/docker/docker-compose.prod.yml"
     ).read_text(encoding="utf-8")
-    if "$$$SITE_NAME" in compose:
-        errors.append("docker-compose.prod.yml contains invalid $$$SITE_NAME expansion.")
+    if "$$SITE_NAME" in compose or "sites/$SITE_NAME" in compose:
+        errors.append("docker-compose.prod.yml contains an invalid Compose/Bash site-name expansion.")
+    if "sites/$SITE_NAME" not in compose or 'bench --site "$SITE_NAME"' not in compose:
+        errors.append("docker-compose.prod.yml must preserve SITE_NAME for the container shell with $ escaping.")
     if "MARIADB_ROOT_PASSWORD" not in compose:
         errors.append("MariaDB root password is not wired through deployment configuration.")
 
