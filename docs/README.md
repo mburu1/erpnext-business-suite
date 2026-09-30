@@ -44,6 +44,7 @@ This directory is the canonical engineering documentation index for ERPNext Busi
 - [Deployment architecture](deployment/deployment-architecture.md)
 - [Production deployment](deployment/production.md)
 - [CI/CD hardening](deployment/ci-cd-hardening.md)
+- [Final release readiness audit](deployment/release-readiness.md)
 
 ### Troubleshooting / runbooks
 - [Runbook index](troubleshooting/runbooks.md)
