@@ -1,0 +1,1 @@
+"""Business Suite application module."""

@@ -1,0 +1,1 @@
+"""Business Suite custom DocTypes."""

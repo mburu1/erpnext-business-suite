@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "ERPNext business-suite extensions and domain workflows."
 requires-python = ">=3.10"
 license = { text = "MIT" }
+dependencies = ["requests>=2.31,<3"]
 
 [tool.setuptools]
 include-package-data = true

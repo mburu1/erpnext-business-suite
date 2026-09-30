@@ -1,0 +1,18 @@
+{
+  "add_total_row": 1,
+  "creation": "2026-09-30 00:00:00.000000",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "idx": 0,
+  "is_standard": "Yes",
+  "module": "Business Suite",
+  "name": "Inventory Summary",
+  "owner": "Administrator",
+  "prepared_report": 0,
+  "ref_doctype": "Business Product",
+  "report_name": "Inventory Summary",
+  "report_type": "Script Report",
+  "roles": ["System Manager"]
+}
