@@ -12,10 +12,7 @@ ROLE_INVENTORY = "Business Suite Inventory User"
 ROLE_INTEGRATION = "Business Suite Integration User"
 ROLE_REPORT = "Business Suite Report User"
 
-ROLES = (
-    ROLE_ADMIN, ROLE_MANAGER, ROLE_SALES,
-    ROLE_INVENTORY, ROLE_INTEGRATION, ROLE_REPORT,
-)
+ROLES = (ROLE_ADMIN, ROLE_MANAGER, ROLE_SALES, ROLE_INVENTORY, ROLE_INTEGRATION, ROLE_REPORT)
 
 DOCTYPE_PERMISSIONS = {
     "Business Customer": {
@@ -46,31 +43,51 @@ DOCTYPE_PERMISSIONS = {
     },
 }
 
-def _has_role(user: str, role: str) -> bool:
-    return bool(user and role in frappe.get_roles(user))
+MANAGED_DOCTYPES = tuple(DOCTYPE_PERMISSIONS)
+
+
+def has_role(user: str, role: str) -> bool:
+    return bool(user and (user == "Administrator" or role in frappe.get_roles(user)))
+
+
+def has_any_role(user: str, roles: set[str] | tuple[str, ...]) -> bool:
+    return bool(user and (user == "Administrator" or set(roles).intersection(frappe.get_roles(user))))
+
+
+def require_role(role: str, user: str | None = None) -> None:
+    user = user or frappe.session.user
+    if not has_role(user, role):
+        frappe.throw(_("The current user requires the {0} role.").format(role), frappe.PermissionError)
+
+
+def require_any_role(roles: set[str] | tuple[str, ...], user: str | None = None) -> None:
+    user = user or frappe.session.user
+    if not has_any_role(user, roles):
+        frappe.throw(_("The current user does not have a required Business Suite role."), frappe.PermissionError)
+
+
+def ensure_document_permission(doc, permission_type: str = "read") -> None:
+    if frappe.session.user == "Guest":
+        frappe.throw(_("Authentication is required."), frappe.PermissionError)
+    if not frappe.has_permission(doc, permission_type):
+        frappe.throw(
+            _("You do not have permission to {0} {1}.").format(permission_type, doc.doctype),
+            frappe.PermissionError,
+        )
+
 
 def _ensure_role(role_name: str) -> None:
     if not frappe.db.exists("Role", role_name):
-        frappe.get_doc({
-            "doctype": "Role",
-            "role_name": role_name,
-            "desk_access": 1,
-            "is_custom": 1,
-        }).insert(ignore_permissions=True)
+        frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1, "is_custom": 1}).insert(ignore_permissions=True)
+
 
 def _permission_exists(doctype: str, role: str) -> bool:
-    return bool(frappe.db.exists(
-        "DocPerm", {"parent": doctype, "role": role, "permlevel": 0}
-    ))
+    return bool(frappe.db.exists("DocPerm", {"parent": doctype, "role": role, "permlevel": 0}))
+
 
 def _upsert_permission(doctype: str, role: str, values: dict) -> None:
     if _permission_exists(doctype, role):
-        frappe.db.set_value(
-            "DocPerm",
-            {"parent": doctype, "role": role, "permlevel": 0},
-            values,
-            update_modified=False,
-        )
+        frappe.db.set_value("DocPerm", {"parent": doctype, "role": role, "permlevel": 0}, values, update_modified=False)
         return
     frappe.get_doc({
         "doctype": "DocPerm",
@@ -82,8 +99,8 @@ def _upsert_permission(doctype: str, role: str, values: dict) -> None:
         **values,
     }).insert(ignore_permissions=True)
 
+
 def sync_rbac() -> None:
-    """Create/update Business Suite roles and their DocType permissions."""
     for role in ROLES:
         _ensure_role(role)
     for doctype, role_map in DOCTYPE_PERMISSIONS.items():
@@ -93,34 +110,26 @@ def sync_rbac() -> None:
             _upsert_permission(doctype, role, values)
     frappe.clear_cache()
 
+
 def has_permission(doc, user=None, permission_type=None):
-    """Apply record-level restrictions after normal RBAC is evaluated."""
     user = user or frappe.session.user
     permission_type = permission_type or "read"
-    if user == "Administrator" or _has_role(user, ROLE_ADMIN):
+    if user == "Administrator" or has_role(user, ROLE_ADMIN):
         return True
     if doc.doctype == "Stock Request":
-        if _has_role(user, ROLE_MANAGER) or _has_role(user, ROLE_INVENTORY):
+        if has_any_role(user, (ROLE_MANAGER, ROLE_INVENTORY)):
             return True
-        if permission_type in {"read", "write", "create"}:
-            return doc.get("requested_by") == user
+        if has_role(user, ROLE_SALES):
+            if permission_type in {"read", "write", "create"}:
+                return doc.get("requested_by") == user
+            return False
     return None
 
+
 def permission_query_conditions(user=None):
-    """Return SQL conditions for user-owned Stock Request records."""
     user = user or frappe.session.user
-    if user == "Administrator" or _has_role(user, ROLE_ADMIN):
+    if user == "Administrator" or has_role(user, ROLE_ADMIN):
         return ""
-    if _has_role(user, ROLE_MANAGER) or _has_role(user, ROLE_INVENTORY):
+    if has_any_role(user, (ROLE_MANAGER, ROLE_INVENTORY)):
         return ""
     return "requested_by = " + frappe.db.escape(user)
-
-def validate_role(role: str) -> None:
-    """Raise PermissionError when the current user lacks an application role."""
-    if frappe.session.user == "Administrator":
-        return
-    if role not in frappe.get_roles(frappe.session.user):
-        frappe.throw(
-            _("The current user requires the {0} role.").format(role),
-            frappe.PermissionError,
-        )
