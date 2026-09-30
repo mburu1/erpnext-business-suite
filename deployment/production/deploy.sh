@@ -10,9 +10,9 @@ cd "$ROOT_DIR"
 set -a
 source "$ENV_FILE"
 set +a
-docker build --build-arg "ERPNEXT_IMAGE=$$ERPNEXT_IMAGE" --tag "$$CUSTOM_IMAGE:$$CUSTOM_TAG" --file deployment/docker/Dockerfile .
-docker compose --env-file "$$ENV_FILE" -f "$$COMPOSE_FILE" config >/dev/null
-docker compose --env-file "$$ENV_FILE" -f "$$COMPOSE_FILE" up -d db redis-cache redis-queue configurator
-docker compose --env-file "$$ENV_FILE" -f "$$COMPOSE_FILE" run --rm create-site
-docker compose --env-file "$$ENV_FILE" -f "$$COMPOSE_FILE" up -d
-docker compose --env-file "$$ENV_FILE" -f "$$COMPOSE_FILE" ps
+docker build --build-arg "ERPNEXT_IMAGE=$ERPNEXT_IMAGE" --tag "$CUSTOM_IMAGE:$CUSTOM_TAG" --file deployment/docker/Dockerfile .
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d db redis-cache redis-queue configurator
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" run --rm create-site
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
