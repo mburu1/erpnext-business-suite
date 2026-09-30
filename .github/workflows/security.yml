@@ -35,7 +35,7 @@ jobs:
 
       - name: Audit application dependencies
         working-directory: apps/business_suite
-        run: pip-audit --project .
+        run: pip-audit .
 
   secret-hygiene:
     name: Secret literal hygiene
