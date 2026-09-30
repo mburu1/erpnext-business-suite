@@ -38,10 +38,10 @@ Copy backups off-host and periodically perform a restore drill. A backup is only
 
 ## Release and rollback
 
-GitHub Actions builds images tagged with the commit SHA and publishes the production tag to GHCR. For controlled releases, use an immutable image tag.
+GitHub Actions builds images tagged with the commit SHA and publishes the production tag to GHCR. Production deployment consumes the published immutable image tag; it does not rebuild application source on the target host.
 
 ```bash
-./deployment/production/rollback.sh <previous-image-tag>
+./deployment/production/rollback.sh <previous-40-character-git-sha>
 ./deployment/production/healthcheck.sh
 ```
 
