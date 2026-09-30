@@ -2,17 +2,26 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from business_suite.permissions import ensure_document_permission
 from business_suite.workflow import enforce_transition, record_transition
 
 
 class BusinessCustomer(Document):
+    def before_insert(self):
+        ensure_document_permission(self, "create")
+
+    def before_save(self):
+        if not self.is_new():
+            ensure_document_permission(self, "write")
+        enforce_transition(self)
+
+    def on_trash(self):
+        ensure_document_permission(self, "delete")
+
     def validate(self):
         self._validate_customer()
         self._validate_status_fields()
         self._validate_duplicate_customer()
-
-    def before_save(self):
-        enforce_transition(self)
 
     def after_save(self):
         record_transition(self)
