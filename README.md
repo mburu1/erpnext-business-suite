@@ -159,18 +159,22 @@ Example integration boundaries:
 
 Security is treated as an application concern rather than only a login concern.
 
-Planned controls include:
+Implemented hardening includes:
 
-- Frappe role-based permissions
-- DocType permissions
-- Workflow permissions
-- Server-side authorization
-- Input validation
+- Frappe role-based permissions and DocType permissions
+- Server-side authorization and Stock Request ownership enforcement
+- Input validation and bounded webhook payloads
+- HMAC-SHA256 webhook authentication with constant-time signature comparison
+- IP-based endpoint rate limiting for guest webhook ingress
+- Restricted, application-owned webhook handler paths
+- Security response headers and HTTPS-aware HSTS
 - Secrets supplied through environment/site configuration
 - No credentials committed to source control
-- Integration request auditing
+- Sensitive-data masking helper for structured diagnostics
+- Integration request auditing and idempotency handling
 - Safe error handling
-- Sensitive-data masking in logs
+
+Detailed controls and deployment requirements are documented in `docs/security/hardening.md`.
 
 ## Performance and Scalability
 
@@ -222,6 +226,7 @@ Quality Gates
     +-- Python compilation
     +-- Ruff linting
     +-- Deterministic pytest suite
+    +-- Security hardening regression checks
     +-- Secret-literal hygiene checks
 ```
 
@@ -247,13 +252,13 @@ erpnext-business-suite/
 │       │   ├── modules.txt
 │       │   ├── role_definitions.py
 │       │   ├── workflow_definitions.py
+│       │   ├── security.py
 │       │   │
 │       │   ├── api/
 │       │   ├── business_suite/
 │       │   │   ├── doctype/
 │       │   │   ├── report/
 │       │   │   └── workspace/
-│       │   │
 │       │   ├── integrations/
 │       │   ├── utils/
 │       │   └── tests/
@@ -301,6 +306,9 @@ Integration / Automation
         |
         v
 Testing
+        |
+        v
+Security Hardening
         |
         v
 Deployment + Monitoring
@@ -364,6 +372,7 @@ GitHub Actions will be used for automated checks such as:
 - Python syntax and linting
 - Static validation
 - Deterministic unit and quality tests
+- Security hardening regression checks
 - Integration contract validation
 - Repository structure checks
 - Configuration/secrets hygiene
@@ -379,7 +388,7 @@ Detailed engineering documentation lives under `docs/`:
 - `ooad/` — object-oriented analysis and design
 - `workflows/` — business process definitions
 - `integrations/` — API contracts and integration flows
-- `security/` — authentication, authorization, data protection
+- `security/` — authentication, authorization, data protection, and hardening
 - `deployment/` — environment and release procedures
 - `troubleshooting/` — diagnostics and operational runbooks
 
@@ -391,7 +400,7 @@ The repository is intended to demonstrate practical experience with:
 
 while showing the full engineering lifecycle:
 
-`requirements -> design -> implementation -> integration -> testing -> deployment -> support`
+`requirements -> design -> implementation -> integration -> testing -> security -> deployment -> support`
 
 ## Roadmap
 
@@ -424,9 +433,12 @@ while showing the full engineering lifecycle:
 - Integration logs
 - Retry and failure handling
 
-### Phase 6 — Quality
+### Phase 6 — Quality & Security
 - Automated tests
 - Security review
+- HTTP hardening
+- Webhook authentication and rate limiting
+- Secret hygiene
 - Performance analysis
 - Troubleshooting runbooks
 - Automated unit and quality gates
