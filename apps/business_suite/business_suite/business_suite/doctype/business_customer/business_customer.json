@@ -8,7 +8,7 @@
   "field_order": ["customer", "onboarding_status", "segment", "risk_level", "verification_notes", "approved_by"],
   "fields": [
     {"fieldname": "customer", "fieldtype": "Link", "in_list_view": 1, "label": "Customer", "options": "Customer", "reqd": 1},
-    {"fieldname": "onboarding_status", "fieldtype": "Select", "in_list_view": 1, "label": "Onboarding Status", "options": "Draft\nVerification\nApproved\nActive", "default": "Draft", "reqd": 1},
+    {"fieldname": "onboarding_status", "fieldtype": "Select", "in_list_view": 1, "label": "Onboarding Status", "options": "Draft\nVerification\nApproved\nRejected\nActive", "default": "Draft", "reqd": 1},
     {"fieldname": "segment", "fieldtype": "Data", "label": "Segment"},
     {"fieldname": "risk_level", "fieldtype": "Select", "in_list_view": 1, "label": "Risk Level", "options": "Low\nMedium\nHigh", "default": "Medium", "reqd": 1},
     {"fieldname": "verification_notes", "fieldtype": "Small Text", "label": "Verification Notes"},
@@ -27,7 +27,6 @@
   "track_views": 0,
   "istable": 0,
   "is_submittable": 0,
-  "issingle": 0,
   "is_tree": 0,
   "is_virtual": 0,
   "quick_entry": 1,

@@ -3,6 +3,7 @@ from frappe import _
 from frappe.model.document import Document
 
 from business_suite.utils.validation import require_non_negative
+from business_suite.workflow import enforce_transition, record_transition
 
 
 class IntegrationLog(Document):
@@ -11,6 +12,12 @@ class IntegrationLog(Document):
         self._validate_http_status()
         self._validate_duration()
         self._validate_processing_state()
+
+    def before_save(self):
+        enforce_transition(self)
+
+    def after_save(self):
+        record_transition(self)
 
     def _validate_required_context(self):
         if not self.integration_name:

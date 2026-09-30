@@ -28,3 +28,15 @@ class TestIntegrationLog(FrappeTestCase):
         )
 
         self.assertRaises(frappe.ValidationError, doc.validate)
+
+    def test_invalid_initial_state_is_rejected_before_save(self):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Integration Log",
+                "integration_name": "Unit Test",
+                "direction": "Outbound",
+                "status": "Completed",
+            }
+        )
+
+        self.assertRaises(frappe.ValidationError, doc.before_save)

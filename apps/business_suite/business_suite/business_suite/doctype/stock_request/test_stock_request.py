@@ -40,3 +40,36 @@ class TestStockRequest(FrappeTestCase):
         )
 
         self.assertRaises(frappe.ValidationError, doc.validate)
+
+    def test_invalid_state_is_rejected_before_save(self):
+        warehouse = frappe.db.get_value("Warehouse", {}, "name")
+        if not warehouse:
+            self.skipTest("No Warehouse exists in the test database.")
+
+        doc = frappe.get_doc(
+            {
+                "doctype": "Stock Request",
+                "requested_by": frappe.session.user,
+                "warehouse": warehouse,
+                "status": "Manager Review",
+                "items": [],
+            }
+        )
+
+        self.assertRaises(frappe.ValidationError, doc.before_save)
+
+    def test_initial_state_is_draft(self):
+        warehouse = frappe.db.get_value("Warehouse", {}, "name")
+        if not warehouse:
+            self.skipTest("No Warehouse exists in the test database.")
+
+        doc = frappe.get_doc(
+            {
+                "doctype": "Stock Request",
+                "requested_by": frappe.session.user,
+                "warehouse": warehouse,
+                "status": "Submitted",
+            }
+        )
+
+        self.assertRaises(frappe.ValidationError, doc.before_save)

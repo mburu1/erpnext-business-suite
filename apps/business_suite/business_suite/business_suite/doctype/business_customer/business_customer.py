@@ -2,12 +2,20 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from business_suite.workflow import enforce_transition, record_transition
+
 
 class BusinessCustomer(Document):
     def validate(self):
         self._validate_customer()
         self._validate_status_fields()
         self._validate_duplicate_customer()
+
+    def before_save(self):
+        enforce_transition(self)
+
+    def after_save(self):
+        record_transition(self)
 
     def _validate_customer(self):
         if not self.customer:

@@ -6,6 +6,7 @@ from business_suite.utils.validation import (
     require_active_business_customer,
     require_existing_link,
 )
+from business_suite.workflow import enforce_transition, record_transition
 
 
 class StockRequest(Document):
@@ -14,6 +15,12 @@ class StockRequest(Document):
         self._validate_business_customer()
         self._validate_items()
         self._validate_status_requirements()
+
+    def before_save(self):
+        enforce_transition(self)
+
+    def after_save(self):
+        record_transition(self)
 
     def _validate_header(self):
         if not self.requested_by:
