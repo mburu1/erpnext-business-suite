@@ -1,4 +1,5 @@
 name: Build Production Image
+
 on:
   push:
     branches: [main]
@@ -12,30 +13,66 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: production-image-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/mburu1/erpnext-business-suite
+  ERPNEXT_IMAGE: frappe/erpnext:v16.36.0
+
 jobs:
   build-image:
+    name: Build & publish production image
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build and push
+
+      - name: Build and push immutable image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: deployment/docker/Dockerfile
           build-args: |
-            ERPNEXT_IMAGE=frappe/erpnext:v16.36.0
+            ERPNEXT_IMAGE=${{ env.ERPNEXT_IMAGE }}
           push: true
           tags: |
-            ghcr.io/mburu1/erpnext-business-suite:${{ github.sha }}
-            ghcr.io/mburu1/erpnext-business-suite:production
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:production
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.sha }}
+          provenance: true
+          sbom: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Record release metadata
+        run: |
+          cat > image-metadata.txt <<EOF
+          image=${IMAGE}:${GITHUB_SHA}
+          erpnext_base=${ERPNEXT_IMAGE}
+          commit=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          EOF
+
+      - name: Upload release metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-image-metadata-${{ github.sha }}
+          path: image-metadata.txt
+          if-no-files-found: error
+          retention-days: 14

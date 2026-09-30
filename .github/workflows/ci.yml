@@ -9,9 +9,19 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  RUFF_VERSION: "0.13.1"
+
 jobs:
   validate:
+    name: Validate & test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,13 +29,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
 
       - name: Compile Python
         run: python -m compileall -q apps scripts
 
       - name: Install Ruff
-        run: python -m pip install --disable-pip-version-check "ruff==0.13.1"
+        run: python -m pip install --disable-pip-version-check "ruff==${{ env.RUFF_VERSION }}"
 
       - name: Lint Python
         run: ruff check apps/business_suite scripts
@@ -40,6 +51,7 @@ jobs:
           test -f docs/security/hardening.md
           test -f docs/performance/scalability.md
           test -f docs/observability/monitoring.md
+          test -f docs/troubleshooting/runbooks.md
           test -f pytest.ini
 
       - name: Install test dependencies
@@ -57,3 +69,34 @@ jobs:
 
       - name: Integration validation
         run: python scripts/run_e2e_validation.py
+
+  repository-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Reject accidental local configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden=(".env" ".env.production" "deployment/docker/.env.production")
+          for path in "${forbidden[@]}"; do
+            if [[ -f "$path" ]]; then
+              echo "Forbidden configuration file committed: $path" >&2
+              exit 1
+            fi
+          done
+
+      - name: Check repository line endings and merge markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)' -- . ':!docs' ':!README.md'; then
+            echo "Unresolved merge conflict markers detected." >&2
+            exit 1
+          fi

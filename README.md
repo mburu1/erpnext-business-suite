@@ -37,6 +37,35 @@ This project is designed around the responsibilities of an ERPNext / Frappe Deve
 | CI | GitHub Actions |
 | Source Control | Git / GitHub |
 
+## CI/CD
+
+GitHub Actions provides layered validation and controlled artifact publication.
+
+### Continuous Integration
+
+- Python compilation and Ruff linting
+- Deterministic unit/quality tests
+- E2E/integration contract validation
+- Repository structure and configuration hygiene checks
+- Pull-request and `main` validation
+- Concurrency cancellation and job timeouts
+- Least-privilege workflow permissions
+
+### CI/CD supply-chain hardening
+
+- `pip-audit` dependency vulnerability scanning
+- Gitleaks secret detection
+- Actionlint workflow validation
+- Dependabot updates for GitHub Actions and Python dependencies
+- Immutable Git-SHA production image tags
+- OCI provenance and SBOM generation
+- Production image build metadata artifacts
+- Protected-environment guidance for actual production deployment
+
+The production image workflow publishes to GitHub Container Registry. The SHA-tagged image is the immutable release reference; `production` is a movable channel tag. Actual production deployment remains an explicit controlled operation.
+
+See `docs/deployment/ci-cd-hardening.md` for the complete release, rollback, governance, and supply-chain controls.
+
 ## ERP Domain Coverage
 
 The project models workflows around four core ERP areas:
@@ -274,6 +303,7 @@ erpnext-business-suite/
 ├── docs/
 ├── deployment/
 └── .github/
+    ├── dependabot.yml
     └── workflows/
 ```
 
@@ -369,21 +399,6 @@ The deployment documentation will cover:
 11. Application logs
 12. Rollback procedures
 
-## CI/CD
-
-GitHub Actions will be used for automated checks such as:
-
-- Python syntax and linting
-- Static validation
-- Deterministic unit and quality tests
-- Security hardening regression checks
-- Performance/scalability regression contracts
-- Integration contract validation
-- Repository structure checks
-- Configuration/secrets hygiene
-
-Production deployment should remain an explicit controlled step.
-
 ## Documentation
 
 Detailed engineering documentation lives under `docs/`:
@@ -395,7 +410,7 @@ Detailed engineering documentation lives under `docs/`:
 - `integrations/` — API contracts and integration flows
 - `security/` — authentication, authorization, data protection, and hardening
 - `performance/` — query efficiency, caching, indexing, API bounds, and scaling guidance
-- `deployment/` — environment and release procedures
+- `deployment/` — environment, CI/CD, release, and rollback procedures
 - `troubleshooting/` — diagnostics and operational runbooks
 
 ## Portfolio Outcomes
@@ -452,12 +467,14 @@ while showing the full engineering lifecycle:
 - Performance regression contracts
 - Troubleshooting runbooks
 - Automated unit and quality gates
+- CI/CD supply-chain hardening
 
 ### Phase 7 — Deployment
 - Docker-based environment
 - Nginx
 - CI/CD
 - Backup and recovery documentation
+- Controlled production releases and rollback
 
 ## License
 
