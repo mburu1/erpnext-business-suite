@@ -1,0 +1,1 @@
+import{currentUser}from"./auth/auth.js";import{mountNavigation}from"./components/navigation.js";export async function bootstrap(active){const user=await currentUser();if(!user){location.href="login.html";return null}document.querySelectorAll("[data-user]").forEach(e=>e.textContent=user);mountNavigation(active);return user}
