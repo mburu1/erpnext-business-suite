@@ -84,14 +84,14 @@ services:
       - -lc
       - |
         set -e
-        if [ ! -d "sites/$$$SITE_NAME" ]; then
-          bench new-site "$$$SITE_NAME" --db-root-username=root --db-root-password "$$DB_ROOT_PASSWORD" --mariadb-user-host-login-scope=% --admin-password "$$ADMIN_PASSWORD" --install-app erpnext
+        if [ ! -d "sites/$SITE_NAME" ]; then
+          bench new-site "$SITE_NAME" --db-root-username=root --db-root-password "$$DB_ROOT_PASSWORD" --mariadb-user-host-login-scope=% --admin-password "$$ADMIN_PASSWORD" --install-app erpnext
         fi
         if ! bench --site "$$SITE_NAME" list-apps | grep -qx business_suite; then
           bench --site "$$SITE_NAME" install-app business_suite
         fi
-        bench --site "$$$SITE_NAME" migrate
-        bench --site "$$$SITE_NAME" clear-cache
+        bench --site "$SITE_NAME" migrate
+        bench --site "$SITE_NAME" clear-cache
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
