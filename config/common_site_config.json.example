@@ -1,1 +1,5 @@
-# common_site_config.json.example
+{
+  "redis_cache": "redis://127.0.0.1:13000",
+  "redis_queue": "redis://127.0.0.1:11000",
+  "background_workers": 1
+}

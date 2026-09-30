@@ -2,21 +2,24 @@
 
 ~~~mermaid
 flowchart LR
-    X[External System] --> V[Validate]
+    X[External System] --> S[HMAC Signature]
+    S --> V[Validate JSON]
     V --> I[Idempotency Check]
     I --> Q[Queue Job]
-    Q --> P[Business Action]
+    Q --> P[Business Handler]
     P --> L[Integration Log]
 ~~~
 
 ## Controls
 
-- Validate authenticity/signatures when supported.
-- Reject malformed payloads.
-- Assign event/correlation IDs.
-- Detect duplicate delivery.
-- Use background jobs for expensive processing.
+- Validate authenticity with HMAC-SHA256.
+- Reject malformed JSON and unsupported payload shapes.
+- Accept an external event ID or idempotency key when supplied.
+- Detect duplicate delivery before queueing.
+- Process expensive business work in a background job.
+- Persist integration state and event IDs.
 - Minimize logged payload content.
-- Return deliberate HTTP statuses.
+- Never log webhook secrets or authorization headers.
+- Return deliberate HTTP statuses for malformed/authentication failures.
 
-A persisted event ID should prevent the same business side effect from being applied twice.
+A persisted inbound event ID prevents the same event from being queued more than once.

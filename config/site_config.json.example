@@ -1,1 +1,29 @@
-# site_config.json.example
+{
+  "db_name": "site_database_name",
+  "db_password": "replace-me",
+  "business_suite_integrations": {
+    "inventory": {
+      "base_url": "https://api.example.com",
+      "method": "POST",
+      "path": "/v1/inventory/sync",
+      "connect_timeout": 5,
+      "read_timeout": 30,
+      "max_retries": 2,
+      "backoff_seconds": 0.5,
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      "payload": {
+        "source": "erpnext-business-suite"
+      }
+    },
+    "webhooks": {
+      "inventory": {
+        "require_signature": true,
+        "secret": "set-this-only-in-a-real-site_config.json",
+        "handler": ""
+      }
+    }
+  }
+}

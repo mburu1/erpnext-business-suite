@@ -8,16 +8,21 @@ from business_suite.workflow import enforce_transition, record_transition
 
 
 class IntegrationLog(Document):
+    def _is_internal_integration(self):
+        return bool(getattr(self.flags, "internal_integration", False))
+
     def before_insert(self):
-        ensure_document_permission(self, "create")
+        if not self._is_internal_integration():
+            ensure_document_permission(self, "create")
 
     def before_save(self):
-        if not self.is_new():
+        if not self.is_new() and not self._is_internal_integration():
             ensure_document_permission(self, "write")
         enforce_transition(self)
 
     def on_trash(self):
-        ensure_document_permission(self, "delete")
+        if not self._is_internal_integration():
+            ensure_document_permission(self, "delete")
 
     def validate(self):
         self._validate_required_context()

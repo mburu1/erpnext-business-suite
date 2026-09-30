@@ -4,8 +4,22 @@ The integration boundary isolates external transport from Business Suite busines
 
 ## Structure
 
-- `clients/` — protocol and transport clients.
-- `services/` — orchestration and audit logging.
-- `webhooks/` — inbound event handling.
+- clients/ — outbound protocol and transport clients.
+- services/ — outbound orchestration, retry and audit logging.
+- webhooks/ — inbound HMAC authentication, idempotency and asynchronous processing.
 
-Configuration is read from Frappe/site configuration. Secrets must not be committed.
+## Configuration
+
+Integration definitions live in the Frappe site's site_config.json under business_suite_integrations.
+
+Secrets belong only in real site configuration or a secret-management system. Do not commit credentials, tokens or webhook secrets.
+
+## Reliability controls
+
+- Explicit connection/read timeouts.
+- Bounded retries for transient HTTP failures.
+- Correlation and idempotency headers.
+- Persistent Integration Log records.
+- HMAC-SHA256 inbound webhook validation.
+- Duplicate webhook detection.
+- Background queue processing.

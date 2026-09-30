@@ -95,6 +95,9 @@ def enforce_transition(doc) -> None:
             )
         )
 
+    if getattr(doc.flags, "internal_integration", False):
+        return
+
     user = frappe.session.user
     if not _has_any_role(user, allowed):
         frappe.throw(
