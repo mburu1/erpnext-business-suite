@@ -79,8 +79,10 @@ def main() -> int:
     rollback = (
         ROOT / "deployment/production/rollback.sh"
     ).read_text(encoding="utf-8")
-    if "ALLOW_MUTABLE_TAG" not in deploy:
-        errors.append("Production deployment does not guard against mutable image tags.")
+    if "40-character Git commit SHA" not in deploy:
+        errors.append("Production deployment does not enforce immutable Git-SHA image tags.")
+    if "docker pull \"$CUSTOM_IMAGE:$CUSTOM_TAG\"" not in deploy:
+        errors.append("Production deployment must consume the published image instead of rebuilding on the target host.")
     if "40-character Git commit SHA" not in rollback:
         errors.append("Rollback does not enforce immutable Git-SHA releases.")
 
