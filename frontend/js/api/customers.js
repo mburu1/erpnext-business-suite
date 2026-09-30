@@ -1,0 +1,1 @@
+import{api}from"./client.js";const m="business_suite.api.customer_api.";export const customers={list:(params={})=>api.get(m+"list_business_customers",params),get:name=>api.get(m+"get_business_customer",{name})};
