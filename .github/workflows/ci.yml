@@ -34,6 +34,8 @@ jobs:
         run: |
           test -f README.md
           test -f apps/business_suite/business_suite/hooks.py
+          test -f apps/business_suite/business_suite/security.py
+          test -f docs/security/hardening.md
           test -f pytest.ini
 
       - name: Install test dependencies
@@ -44,7 +46,8 @@ jobs:
           pytest -q \
             apps/business_suite/business_suite/tests/test_unit_rbac.py \
             apps/business_suite/business_suite/tests/test_unit_workflows.py \
-            apps/business_suite/business_suite/tests/test_quality_contracts.py
+            apps/business_suite/business_suite/tests/test_quality_contracts.py \
+            apps/business_suite/business_suite/tests/test_security_hardening.py
 
       - name: Integration validation
         run: python scripts/run_e2e_validation.py
