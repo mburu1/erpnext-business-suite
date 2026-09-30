@@ -1,0 +1,1 @@
+import{api}from"./client.js";const m="business_suite.api.integration_api.";export const integrations={list:(params={})=>api.get(m+"list_logs",params),get:name=>api.get(m+"get_log",{name}),enqueue:(integration_name,record_id)=>api.post(m+"enqueue_sync",{integration_name,record_id}),retry:name=>api.post(m+"retry_log",{name})};
