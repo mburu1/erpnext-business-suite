@@ -5,6 +5,17 @@ app_description = "ERPNext business-suite extensions and domain workflows."
 app_email = ""
 app_license = "MIT"
 
-# Keep framework integration intentionally minimal at the foundation stage.
-# Domain DocTypes, permissions, workflows, APIs, integrations and reports are
-# introduced incrementally in subsequent implementation stages.
+# RBAC is synchronized on installation and migration so role and DocPerm
+# definitions remain reproducible across environments.
+after_install = "business_suite.permissions.sync_rbac"
+after_migrate = "business_suite.permissions.sync_rbac"
+
+# Row-level authorization hooks. Standard Frappe DocType permissions are
+# evaluated first; these hooks add application-specific ownership rules.
+has_permission = {
+    "Stock Request": "business_suite.permissions.has_permission",
+}
+
+permission_query_conditions = {
+    "Stock Request": "business_suite.permissions.permission_query_conditions",
+}
