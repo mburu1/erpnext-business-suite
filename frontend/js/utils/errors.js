@@ -1,0 +1,1 @@
+export function errorMessage(error){return error?.message||error?.exc_type||String(error||"Request failed")}export function showError(container,error){container.innerHTML='<div class="alert error">'+errorMessage(error)+"</div>"}
