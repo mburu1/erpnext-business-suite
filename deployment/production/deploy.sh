@@ -15,17 +15,14 @@ set +a
 : "${CUSTOM_TAG:?Set CUSTOM_TAG}"
 : "${SITE_NAME:?Set SITE_NAME}"
 
-if [[ "$CUSTOM_TAG" == "production" || "$CUSTOM_TAG" == "latest" ]]; then
-  if [[ "${ALLOW_MUTABLE_TAG:-false}" != "true" ]]; then
-    echo "ERROR: production deployment requires an immutable image tag (Git SHA)." >&2
-    echo "Set ALLOW_MUTABLE_TAG=true only for an explicitly controlled non-production operation." >&2
-    exit 1
-  fi
-fi
+[[ "$CUSTOM_TAG" =~ ^[0-9a-f]{40}$ ]] || {
+  echo "ERROR: production deployment requires a 40-character Git commit SHA image tag." >&2
+  exit 1
+}
 
 python3 scripts/production_readiness_audit.py
 
-docker build --build-arg "ERPNEXT_IMAGE=$ERPNEXT_IMAGE" --tag "$CUSTOM_IMAGE:$CUSTOM_TAG" --file deployment/docker/Dockerfile .
+docker pull "$CUSTOM_IMAGE:$CUSTOM_TAG"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d db redis-cache redis-queue configurator
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" run --rm create-site
