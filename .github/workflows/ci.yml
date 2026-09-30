@@ -44,6 +44,9 @@ jobs:
       - name: Validate documentation synchronization
         run: python scripts/validate_documentation.py
 
+      - name: Production readiness audit
+        run: python scripts/production_readiness_audit.py
+
       - name: Validate scaffold
         run: |
           test -f README.md
