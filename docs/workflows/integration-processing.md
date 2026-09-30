@@ -7,9 +7,15 @@ stateDiagram-v2
     Processing --> Completed
     Processing --> Failed
     Failed --> Queued : Retryable
-    Failed --> [*] : Permanent
     Completed --> [*]
 ~~~
+
+| From | To | Required role |
+|---|---|---|
+| Queued | Processing | Integration, Administrator |
+| Processing | Completed | Integration, Administrator |
+| Processing | Failed | Integration, Administrator |
+| Failed | Queued | Integration, Administrator |
 
 ## Processing policy
 
@@ -20,3 +26,4 @@ stateDiagram-v2
 - Use idempotency keys where supported.
 - Persist outcome and latency.
 - Keep secrets out of logs.
+- Enforce the state machine before persistence.
