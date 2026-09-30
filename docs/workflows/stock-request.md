@@ -12,13 +12,14 @@ stateDiagram-v2
     Rejected --> Closed
 ~~~
 
-| From | To | Role | Condition |
+| From | To | Required role | Condition |
 |---|---|---|---|
-| Draft | Submitted | Employee | Required fields valid |
-| Submitted | Manager Review | System | Submission accepted |
-| Manager Review | Approved | Manager | Policy satisfied |
-| Manager Review | Rejected | Manager | Request declined |
-| Approved | Fulfilled | Operations | Stock available |
-| Fulfilled | Closed | Operations | Fulfillment completed |
+| Draft | Submitted | Sales, Inventory, Manager, Administrator | Required fields valid |
+| Submitted | Manager Review | Manager, Administrator | Request accepted for review |
+| Manager Review | Approved | Manager, Administrator | Policy satisfied |
+| Manager Review | Rejected | Manager, Administrator | Request declined |
+| Approved | Fulfilled | Inventory, Manager, Administrator | Stock available |
+| Fulfilled | Closed | Inventory, Manager, Administrator | Fulfillment completed |
+| Rejected | Closed | Manager, Administrator | Rejection finalized |
 
-Record the actor and transition history for auditability.
+The server rejects skipped states and unauthorized transitions. A new request must start in Draft. Successful transitions are recorded in the document timeline.
