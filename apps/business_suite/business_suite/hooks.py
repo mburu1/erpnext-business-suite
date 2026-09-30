@@ -5,9 +5,15 @@ app_description = "ERPNext business-suite extensions and domain workflows."
 app_email = ""
 app_license = "MIT"
 
-# RBAC is synchronized on installation and migration so role and DocPerm
-after_install = "business_suite.permissions.sync_rbac"
-after_migrate = "business_suite.permissions.sync_rbac"
+# RBAC and performance indexes are synchronized during installation and migration.
+after_install = [
+    "business_suite.permissions.sync_rbac",
+    "business_suite.performance.ensure_indexes",
+]
+after_migrate = [
+    "business_suite.permissions.sync_rbac",
+    "business_suite.performance.ensure_indexes",
+]
 
 # Row-level authorization hooks. Standard Frappe DocType permissions are
 evaluated first; these hooks add application-specific ownership rules.

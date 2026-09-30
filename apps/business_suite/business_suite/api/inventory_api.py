@@ -17,24 +17,48 @@ def list_business_products(limit_start=0, limit_page_length=20, active=None):
     rows = frappe.get_list(
         "Business Product",
         filters=filters,
-        fields=["name", "item_code", "category", "reorder_level", "preferred_warehouse", "active", "modified"],
+        fields=[
+            "name",
+            "item_code",
+            "category",
+            "reorder_level",
+            "preferred_warehouse",
+            "active",
+            "modified",
+        ],
         order_by="modified desc",
         start=limit_start,
         page_length=limit_page_length,
     )
-    return success(rows, limit_start=limit_start, limit_page_length=limit_page_length, count=len(rows))
+    return success(
+        rows,
+        limit_start=limit_start,
+        limit_page_length=limit_page_length,
+        count=len(rows),
+    )
 
 
 @frappe.whitelist()
-def get_stock_snapshot(item_code=None, warehouse=None):
-    """Return current ERPNext stock quantities for an optional item/warehouse."""
+def get_stock_snapshot(
+    item_code=None,
+    warehouse=None,
+    limit_start=0,
+    limit_page_length=100,
+):
+    """Return a bounded, grouped stock snapshot for an optional item/warehouse."""
     ensure_permission("Business Product")
+    limit_start = max(int(limit_start or 0), 0)
+    limit_page_length = min(max(int(limit_page_length or 100), 1), 500)
+
     conditions = ["item_code = %(item_code)s"] if item_code else []
     values = {"item_code": item_code} if item_code else {}
     if warehouse:
         conditions.append("warehouse = %(warehouse)s")
         values["warehouse"] = warehouse
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    values["limit_start"] = limit_start
+    values["limit_page_length"] = limit_page_length
+
     rows = frappe.db.sql(
         f"""
         SELECT item_code, warehouse,
@@ -45,8 +69,14 @@ def get_stock_snapshot(item_code=None, warehouse=None):
         {where_clause}
         GROUP BY item_code, warehouse
         ORDER BY item_code, warehouse
+        LIMIT %(limit_start)s, %(limit_page_length)s
         """,
         values,
         as_dict=True,
     )
-    return success(rows, count=len(rows))
+    return success(
+        rows,
+        limit_start=limit_start,
+        limit_page_length=limit_page_length,
+        count=len(rows),
+    )
