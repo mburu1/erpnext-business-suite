@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from business_suite.permissions import ensure_document_permission
 from business_suite.utils.validation import (
     require_existing_link,
     require_non_negative,
@@ -9,6 +10,16 @@ from business_suite.utils.validation import (
 
 
 class BusinessProduct(Document):
+    def before_insert(self):
+        ensure_document_permission(self, "create")
+
+    def before_save(self):
+        if not self.is_new():
+            ensure_document_permission(self, "write")
+
+    def on_trash(self):
+        ensure_document_permission(self, "delete")
+
     def validate(self):
         self._validate_item()
         self._validate_category()
