@@ -178,16 +178,16 @@ Detailed controls and deployment requirements are documented in `docs/security/h
 
 ## Performance and Scalability
 
-The project will document and demonstrate:
+Implemented performance controls include:
 
-- Efficient database queries
-- Appropriate indexing
-- Pagination for large datasets
-- Avoidance of unnecessary N+1 access patterns
-- Background jobs for long-running work
-- Caching where appropriate
-- Asynchronous integration processing
-- Monitoring of slow operations
+- Set-based dashboard inventory aggregation to eliminate the previous product-by-product `Bin` query pattern.
+- Short-lived, authenticated-user-scoped dashboard caching.
+- Idempotent MariaDB indexes for repeated status filters, product/warehouse joins, and integration request lookup.
+- Bounded inventory snapshot pagination with a maximum response size.
+- Background integration processing through Frappe workers with connect/read timeouts and bounded retries.
+- Slow-operation and query-plan investigation guidance.
+
+Detailed implementation and operational guidance is documented in `docs/performance/scalability.md`.
 
 ## Testing Strategy
 
@@ -227,6 +227,7 @@ Quality Gates
     +-- Ruff linting
     +-- Deterministic pytest suite
     +-- Security hardening regression checks
+    +-- Performance/scalability regression contracts
     +-- Secret-literal hygiene checks
 ```
 
@@ -253,7 +254,7 @@ erpnext-business-suite/
 │       │   ├── role_definitions.py
 │       │   ├── workflow_definitions.py
 │       │   ├── security.py
-│       │   │
+│       │   ├── performance.py
 │       │   ├── api/
 │       │   ├── business_suite/
 │       │   │   ├── doctype/
@@ -309,6 +310,9 @@ Testing
         |
         v
 Security Hardening
+        |
+        v
+Performance & Scalability
         |
         v
 Deployment + Monitoring
@@ -373,6 +377,7 @@ GitHub Actions will be used for automated checks such as:
 - Static validation
 - Deterministic unit and quality tests
 - Security hardening regression checks
+- Performance/scalability regression contracts
 - Integration contract validation
 - Repository structure checks
 - Configuration/secrets hygiene
@@ -389,6 +394,7 @@ Detailed engineering documentation lives under `docs/`:
 - `workflows/` — business process definitions
 - `integrations/` — API contracts and integration flows
 - `security/` — authentication, authorization, data protection, and hardening
+- `performance/` — query efficiency, caching, indexing, API bounds, and scaling guidance
 - `deployment/` — environment and release procedures
 - `troubleshooting/` — diagnostics and operational runbooks
 
@@ -400,7 +406,7 @@ The repository is intended to demonstrate practical experience with:
 
 while showing the full engineering lifecycle:
 
-`requirements -> design -> implementation -> integration -> testing -> security -> deployment -> support`
+`requirements -> design -> implementation -> integration -> testing -> security -> performance -> deployment -> support`
 
 ## Roadmap
 
@@ -433,13 +439,17 @@ while showing the full engineering lifecycle:
 - Integration logs
 - Retry and failure handling
 
-### Phase 6 — Quality & Security
+### Phase 6 — Quality, Security & Performance
 - Automated tests
 - Security review
 - HTTP hardening
 - Webhook authentication and rate limiting
 - Secret hygiene
-- Performance analysis
+- Set-based query optimization
+- Database indexing
+- Bounded API pagination
+- Permission-scoped caching
+- Performance regression contracts
 - Troubleshooting runbooks
 - Automated unit and quality gates
 
