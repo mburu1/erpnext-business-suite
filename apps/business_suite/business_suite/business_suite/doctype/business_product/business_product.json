@@ -5,19 +5,111 @@
   "creation": "2026-09-30 00:00:00.000000",
   "doctype": "DocType",
   "engine": "InnoDB",
-  "field_order": ["item_code", "category", "reorder_level", "preferred_warehouse", "active"],
+  "field_order": [
+    "item_code",
+    "category",
+    "reorder_level",
+    "preferred_warehouse",
+    "active"
+  ],
   "fields": [
-    {"fieldname": "item_code", "fieldtype": "Link", "in_list_view": 1, "label": "Item", "options": "Item", "reqd": 1},
-    {"fieldname": "category", "fieldtype": "Link", "in_list_view": 1, "label": "Category", "options": "Item Group"},
-    {"fieldname": "reorder_level", "fieldtype": "Float", "in_list_view": 1, "label": "Reorder Level", "non_negative": 1, "precision": 3},
-    {"fieldname": "preferred_warehouse", "fieldtype": "Link", "label": "Preferred Warehouse", "options": "Warehouse"},
-    {"fieldname": "active", "fieldtype": "Check", "in_list_view": 1, "label": "Active", "default": 1}
+    {
+      "fieldname": "item_code",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Item",
+      "options": "Item",
+      "reqd": 1
+    },
+    {
+      "fieldname": "category",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Category",
+      "options": "Item Group"
+    },
+    {
+      "fieldname": "reorder_level",
+      "fieldtype": "Float",
+      "in_list_view": 1,
+      "label": "Reorder Level",
+      "non_negative": 1,
+      "precision": 3
+    },
+    {
+      "fieldname": "preferred_warehouse",
+      "fieldtype": "Link",
+      "label": "Preferred Warehouse",
+      "options": "Warehouse"
+    },
+    {
+      "fieldname": "active",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Active",
+      "default": 1
+    }
   ],
   "links": [],
   "module": "Business Suite",
   "name": "Business Product",
   "owner": "Administrator",
-  "permissions": [],
+  "permissions": [
+    {
+      "role": "Business Suite Administrator",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Manager",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Inventory User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Sales User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Report User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
   "sort_field": "modified",
   "sort_order": "DESC",
   "title_field": "item_code",
