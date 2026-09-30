@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 
 from business_suite.permissions import has_any_role
-from business_suite.role_definitions import ROLE_ADMIN
 from business_suite.workflow_definitions import WORKFLOWS
 
 
