@@ -1,0 +1,1 @@
+export function alertBox(type,message){return '<div class="alert '+type+'">'+String(message).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))+"</div>"}
