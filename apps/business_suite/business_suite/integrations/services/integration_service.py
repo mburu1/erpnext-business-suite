@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 
 import frappe
-from frappe import _
 
 
 class IntegrationService:
