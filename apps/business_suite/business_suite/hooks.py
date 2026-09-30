@@ -1,0 +1,5 @@
+app_name = "business_suite"
+app_title = "Business Suite"
+app_publisher = "Mwangi Wa Mburu"
+app_description = "ERPNext/Frappe business operations extensions"
+app_license = "MIT"
