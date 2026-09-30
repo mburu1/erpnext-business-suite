@@ -10,12 +10,14 @@ stateDiagram-v2
     Rejected --> Draft
 ~~~
 
-## Rules
+## Transition enforcement
 
-1. Capture required customer information.
-2. Complete verification.
-3. Restrict approval to authorized roles.
-4. Activate only after approval.
-5. Preserve verification and approval history.
+| From | To | Required role |
+|---|---|---|
+| Draft | Verification | Sales, Manager, Administrator |
+| Verification | Approved | Manager, Administrator |
+| Verification | Rejected | Manager, Administrator |
+| Approved | Active | Manager, Administrator |
+| Rejected | Draft | Sales, Manager, Administrator |
 
-The custom DocType augments the ERPNext Customer master.
+The server rejects every transition outside this graph. A new record must start in Draft. Successful transitions are written to the document timeline.
