@@ -15,6 +15,7 @@ def test_test_suite_has_all_required_validation_levels():
         "test_integrations.py",
         "test_permissions.py",
         "test_e2e_contracts.py",
+        "test_performance.py",
     }
     actual = {path.name for path in TEST_ROOT.glob("test_*.py")}
     assert expected <= actual
@@ -59,3 +60,4 @@ def test_ci_runs_the_deterministic_quality_suite():
     assert "test_unit_rbac.py" in workflow
     assert "test_unit_workflows.py" in workflow
     assert "test_quality_contracts.py" in workflow
+    assert "test_performance.py" in workflow
