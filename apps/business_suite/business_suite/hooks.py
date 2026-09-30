@@ -16,7 +16,7 @@ after_migrate = [
 ]
 
 # Row-level authorization hooks. Standard Frappe DocType permissions are
-evaluated first; these hooks add application-specific ownership rules.
+# evaluated first; these hooks add application-specific ownership rules.
 has_permission = {
     "Stock Request": "business_suite.permissions.has_permission",
 }
