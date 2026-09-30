@@ -1,0 +1,1 @@
+# Integration Summary\n\nAggregates Integration Log activity by integration and direction, including request volume, failures, and average processing duration.\n

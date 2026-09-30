@@ -1,1 +1,65 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard — Business Suite</title><link rel="stylesheet" href="../css/variables.css"><link rel="stylesheet" href="../css/layout.css"><link rel="stylesheet" href="../css/components.css"><link rel="stylesheet" href="../css/app.css"></head><body><div data-navigation></div><main class="main"><header class="topbar"><strong>Dashboard</strong><span data-user></span></header><section class="content" data-dashboard><h1>Dashboard</h1><p class="page-subtitle">Operational overview from Business Suite APIs.</p><div class="grid grid-4"><div class="card stat"><span class="muted">Customers</span><span class="value" data-customer-count>—</span></div><div class="card stat"><span class="muted">Products</span><span class="value" data-product-count>—</span></div><div class="card stat"><span class="muted">Integration logs</span><span class="value" data-integration-count>—</span></div><div class="card stat"><span class="muted">Stock rows</span><span class="value" data-stock-count>—</span></div></div></section></main><script type="module">import{bootstrap}from"../js/app.js";import{render}from"../js/pages/dashboard.js";if(await bootstrap("dashboard"))render()</script></body></html>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — Business Suite</title>
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/components.css">
+<link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<div data-navigation></div>
+<main class="main">
+<header class="topbar"><strong>Dashboard</strong><span data-user></span></header>
+<section class="content" data-dashboard>
+<div class="page-heading">
+    <div>
+        <h1>Business Suite Dashboard</h1>
+        <p class="page-subtitle">Operational overview across customers, inventory, stock requests and integrations.</p>
+    </div>
+    <span class="muted">As of <span data-dashboard-as-of>—</span></span>
+</div>
+
+<div class="grid grid-4">
+    <div class="card stat"><span class="muted">Customers</span><span class="value" data-customer-count>—</span></div>
+    <div class="card stat"><span class="muted">Active products</span><span class="value" data-product-count>—</span></div>
+    <div class="card stat"><span class="muted">Stock requests</span><span class="value" data-stock-count>—</span></div>
+    <div class="card stat"><span class="muted">Integration logs</span><span class="value" data-integration-count>—</span></div>
+</div>
+
+<div class="grid grid-3 dashboard-sections">
+    <section class="card"><h2>Customer onboarding</h2><div data-customer-status></div></section>
+    <section class="card"><h2>Stock request status</h2><div data-request-status></div></section>
+    <section class="card"><h2>Integration status</h2><div data-integration-status></div></section>
+</div>
+
+<section class="card">
+    <div class="section-heading">
+        <div><h2>Low-stock exceptions</h2><p class="muted"><span data-low-stock-count>0</span> active products below reorder level.</p></div>
+        <a href="products.html">Open products</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Item</th><th>Warehouse</th><th>Actual</th><th>Projected</th><th>Reorder level</th></tr></thead>
+            <tbody data-low-stock><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card report-links">
+    <h2>Reports</h2>
+    <div class="grid grid-3">
+        <a class="link-card" href="../../apps/business_suite/business_suite/business_suite/report/sales_performance">Sales Performance</a>
+        <a class="link-card" href="../../apps/business_suite/business_suite/business_suite/report/inventory_summary">Inventory Summary</a>
+        <a class="link-card" href="../../apps/business_suite/business_suite/business_suite/report/customer_activity">Customer Activity</a>
+        <a class="link-card" href="../../apps/business_suite/business_suite/business_suite/report/integration_summary">Integration Summary</a>
+        <a class="link-card" href="../../apps/business_suite/business_suite/business_suite/report/stock_request_status">Stock Request Status</a>
+    </div>
+</section>
+</section>
+</main>
+<script type="module">import{bootstrap}from"../js/app.js";import{render}from"../js/pages/dashboard.js";if(await bootstrap("dashboard"))render()</script>
+</body>
+</html>
