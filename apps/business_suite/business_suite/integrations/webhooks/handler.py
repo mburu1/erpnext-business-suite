@@ -9,8 +9,16 @@ import uuid
 import frappe
 from frappe import _
 
+from business_suite.security import (
+    validate_event_id,
+    validate_handler_path,
+    validate_integration_name,
+    validate_webhook_body_size,
+)
+
 
 def _webhook_config(integration_name: str) -> dict:
+    integration_name = validate_integration_name(integration_name)
     config = frappe.conf.get("business_suite_integrations") or {}
     if not isinstance(config, dict):
         return {}
@@ -25,6 +33,7 @@ def verify_signature(
     signature: str | None,
 ) -> bool:
     """Verify an HMAC-SHA256 webhook signature from site configuration."""
+    validate_webhook_body_size(raw_body)
     config = _webhook_config(integration_name)
     secret = config.get("secret")
     if not secret:
@@ -50,8 +59,12 @@ def handle_event(
     signature: str | None = None,
 ) -> dict:
     """Authenticate, persist and queue a webhook exactly once."""
+    integration_name = validate_integration_name(integration_name)
     if not isinstance(payload, dict):
         frappe.throw(_("Webhook payload must be a JSON object."), frappe.ValidationError)
+
+    if raw_body is not None:
+        validate_webhook_body_size(raw_body)
 
     config = _webhook_config(integration_name)
     if not config:
@@ -64,9 +77,7 @@ def handle_event(
         if raw_body is None or not verify_signature(integration_name, raw_body, signature):
             frappe.throw(_("Invalid webhook signature."), frappe.AuthenticationError)
 
-    event_id = (event_id or payload.get("event_id") or str(uuid.uuid4())).strip()
-    if len(event_id) > 140:
-        frappe.throw(_("Webhook event ID is too long."), frappe.ValidationError)
+    event_id = validate_event_id(event_id or payload.get("event_id") or str(uuid.uuid4()))
 
     existing = frappe.db.exists(
         "Integration Log",
@@ -114,7 +125,7 @@ def process_webhook(integration_log: str, payload: dict) -> None:
         log.save(ignore_permissions=True)
 
         config = _webhook_config(log.integration_name)
-        method_path = config.get("handler")
+        method_path = validate_handler_path(config.get("handler"))
         if method_path:
             frappe.get_attr(method_path)(payload)
 
