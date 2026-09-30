@@ -12,6 +12,8 @@ on:
 permissions:
   contents: read
   packages: write
+  attestations: write
+  id-token: write
 
 concurrency:
   group: production-image-${{ github.ref }}
@@ -41,6 +43,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push immutable image
+        id: push
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -60,13 +63,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Generate image provenance attestation
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
       - name: Record release metadata
         run: |
           cat > image-metadata.txt <<EOF
           image=${IMAGE}:${GITHUB_SHA}
+          image_digest=${{ steps.push.outputs.digest }}
           erpnext_base=${ERPNEXT_IMAGE}
           commit=${GITHUB_SHA}
           repository=${GITHUB_REPOSITORY}
+          workflow=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
           EOF
 
       - name: Upload release metadata
