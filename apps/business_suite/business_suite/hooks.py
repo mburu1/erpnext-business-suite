@@ -27,4 +27,10 @@ permission_query_conditions = {
 
 # Conservative HTTP hardening that does not require deployment-specific
 # configuration or a custom reverse proxy implementation.
-after_request = ["business_suite.security.apply_security_headers"]
+after_request = [
+    "business_suite.security.apply_security_headers",
+    "business_suite.observability.after_request",
+]
+
+# Establish request correlation and timing before application handlers run.
+before_request = ["business_suite.observability.before_request"]
