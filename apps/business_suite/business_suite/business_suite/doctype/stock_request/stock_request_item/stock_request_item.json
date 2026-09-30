@@ -1,0 +1,25 @@
+{
+  "actions": [],
+  "creation": "2026-09-30 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["business_product", "qty", "uom", "notes"],
+  "fields": [
+    {"fieldname": "business_product", "fieldtype": "Link", "in_list_view": 1, "label": "Business Product", "options": "Business Product", "reqd": 1},
+    {"fieldname": "qty", "fieldtype": "Float", "in_list_view": 1, "label": "Quantity", "non_negative": 1, "precision": 3, "reqd": 1},
+    {"fieldname": "uom", "fieldtype": "Link", "in_list_view": 1, "label": "UOM", "options": "UOM"},
+    {"fieldname": "notes", "fieldtype": "Small Text", "label": "Notes"}
+  ],
+  "links": [],
+  "module": "Business Suite",
+  "name": "Stock Request Item",
+  "owner": "Administrator",
+  "permissions": [],
+  "istable": 1,
+  "is_submittable": 0,
+  "issingle": 0,
+  "is_tree": 0,
+  "is_virtual": 0,
+  "allow_rename": 0,
+  "quick_entry": 0
+}

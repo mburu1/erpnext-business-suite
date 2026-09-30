@@ -1,0 +1,32 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "format:BS-PROD-{#####}",
+  "creation": "2026-09-30 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": ["item_code", "category", "reorder_level", "preferred_warehouse", "active"],
+  "fields": [
+    {"fieldname": "item_code", "fieldtype": "Link", "in_list_view": 1, "label": "Item", "options": "Item", "reqd": 1},
+    {"fieldname": "category", "fieldtype": "Link", "in_list_view": 1, "label": "Category", "options": "Item Group"},
+    {"fieldname": "reorder_level", "fieldtype": "Float", "in_list_view": 1, "label": "Reorder Level", "non_negative": 1, "precision": 3},
+    {"fieldname": "preferred_warehouse", "fieldtype": "Link", "label": "Preferred Warehouse", "options": "Warehouse"},
+    {"fieldname": "active", "fieldtype": "Check", "in_list_view": 1, "label": "Active", "default": 1}
+  ],
+  "links": [],
+  "module": "Business Suite",
+  "name": "Business Product",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "title_field": "item_code",
+  "track_changes": 1,
+  "istable": 0,
+  "is_submittable": 0,
+  "issingle": 0,
+  "is_tree": 0,
+  "is_virtual": 0,
+  "quick_entry": 1,
+  "show_name_in_global_search": 1
+}
