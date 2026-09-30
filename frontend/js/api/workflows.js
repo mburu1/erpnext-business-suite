@@ -1,0 +1,1 @@
+import{api}from"./client.js";export const workflows={transition:(doctype,name,target_state)=>api.post("business_suite.api.workflow_api.transition",{doctype,name,target_state})};
