@@ -1,0 +1,41 @@
+name: Build Production Image
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/business_suite/**"
+      - "deployment/docker/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deployment/docker/Dockerfile
+          build-args: |
+            ERPNEXT_IMAGE=frappe/erpnext:v16.36.0
+          push: true
+          tags: |
+            ghcr.io/mburu1/erpnext-business-suite:${{ github.sha }}
+            ghcr.io/mburu1/erpnext-business-suite:production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

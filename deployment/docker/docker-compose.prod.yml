@@ -1,0 +1,189 @@
+services:
+  db:
+    image: mariadb:10.6
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes: [db-data:/var/lib/mysql]
+    networks: [erpnext]
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-cache-data:/data]
+    networks: [erpnext]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-queue-data:/data]
+    networks: [erpnext]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  configurator:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: "no"
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      REDIS_CACHE: redis-cache:6379
+      REDIS_QUEUE: redis-queue:6379
+      SOCKETIO_PORT: "9000"
+    command:
+      - bash
+      - -lc
+      - |
+        ls -1 apps > sites/apps.txt
+        bench set-config -g db_host "$$DB_HOST"
+        bench set-config -gp db_port "$$DB_PORT"
+        bench set-config -g redis_cache "redis://$$REDIS_CACHE"
+        bench set-config -g redis_queue "redis://$$REDIS_QUEUE"
+        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"
+        bench set-config -gp socketio_port "$$SOCKETIO_PORT"
+        bench set-config -g chromium_path /usr/bin/chromium-headless-shell
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      db: {condition: service_healthy}
+      redis-cache: {condition: service_healthy}
+      redis-queue: {condition: service_healthy}
+
+  create-site:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: "no"
+    environment:
+      SITE_NAME: ${SITE_NAME:?Set SITE_NAME}
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        if [ ! -d "sites/$$SITE_NAME" ]; then
+          bench new-site "$$SITE_NAME" --db-root-username=root --db-root-password "$$DB_ROOT_PASSWORD" --mariadb-user-host-login-scope=% --admin-password "$$ADMIN_PASSWORD" --install-app erpnext
+        fi
+        if ! bench --site "$SITE_NAME" list-apps | grep -qx business_suite; then
+          bench --site "$SITE_NAME" install-app business_suite
+        fi
+        bench --site "$$SITE_NAME" migrate
+        bench --site "$$SITE_NAME" clear-cache
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      configurator: {condition: service_completed_successfully}
+
+  backend:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-2}
+      GUNICORN_THREADS: ${GUNICORN_THREADS:-4}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+
+  frontend:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    command: ["nginx-entrypoint.sh"]
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      NGINX_LISTEN_PORT: "8080"
+      FRAPPE_SITE_NAME_HEADER: ${FRAPPE_SITE_NAME_HEADER:-$$host}
+      PROXY_READ_TIMEOUT: ${PROXY_READ_TIMEOUT:-120}
+      CLIENT_MAX_BODY_SIZE: ${CLIENT_MAX_BODY_SIZE:-50m}
+    ports: ["${APP_PORT:-8080}:8080"]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      backend: {condition: service_started}
+      websocket: {condition: service_started}
+
+  websocket:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+
+  queue-short:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    command: ["bench", "worker", "--queue", "short,default"]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+
+  queue-long:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    command: ["bench", "worker", "--queue", "long,default,short"]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+
+  scheduler:
+    image: ${CUSTOM_IMAGE:-erpnext-business-suite}:${CUSTOM_TAG:-latest}
+    restart: unless-stopped
+    command: ["bench", "schedule"]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+    networks: [erpnext]
+    depends_on:
+      create-site: {condition: service_completed_successfully}
+
+volumes:
+  db-data:
+  redis-cache-data:
+  redis-queue-data:
+  sites:
+  logs:
+
+networks:
+  erpnext:
+    driver: bridge
