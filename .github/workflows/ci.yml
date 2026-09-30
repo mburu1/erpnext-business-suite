@@ -41,6 +41,9 @@ jobs:
       - name: Lint Python
         run: ruff check apps/business_suite scripts
 
+      - name: Validate documentation synchronization
+        run: python scripts/validate_documentation.py
+
       - name: Validate scaffold
         run: |
           test -f README.md
