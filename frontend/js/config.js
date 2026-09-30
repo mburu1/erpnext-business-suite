@@ -1,0 +1,1 @@
+window.BusinessSuiteConfig={apiBase:"/api/method/",resourceBase:"/api/resource/",pageSize:20,appName:"ERPNext Business Suite"};
