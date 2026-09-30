@@ -4,8 +4,8 @@
 
 - Application version: **1.0.0**
 - Release artifact: immutable Git-SHA-tagged container image
-- Base image: \`frappe/erpnext:v16.36.0\`
-- Production channel tag: \`production\` (publishing convenience only; deployments must use the immutable SHA tag)
+- Base image: `frappe/erpnext:v16.36.0`
+- Production channel tag: `production` (publishing convenience only; deployments must use the immutable SHA tag)
 
 ## Repository gates
 
@@ -14,7 +14,7 @@ The repository now has deterministic gates for:
 - Python compilation and Ruff linting.
 - Documentation synchronization and internal Markdown links.
 - Unit/quality, security, performance, observability, and E2E contract tests.
-- Dependency vulnerability scanning with \`pip-audit\`.
+- Dependency vulnerability scanning with `pip-audit`.
 - Secret detection with Gitleaks.
 - GitHub Actions syntax validation with Actionlint.
 - Production image SBOM/provenance generation and registry-backed provenance attestation.
@@ -27,15 +27,15 @@ The repository now has deterministic gates for:
 
 Run the repository-only gate locally:
 
-\`\`\`bash
+```bash
 python scripts/production_readiness_audit.py
-\`\`\`
+```
 
 CI runs the same gate before the normal test/integration job completes.
 
 ## Release procedure
 
-1. Confirm the intended commit is on \`main\`.
+1. Confirm the intended commit is on `main`.
 2. Wait for CI and security checks to pass.
 3. Confirm the production image workflow published the commit-SHA image.
 4. Record the image digest, attestation, and workflow run URL as release evidence.
@@ -56,10 +56,10 @@ CI runs the same gate before the normal test/integration job completes.
 
 Use the previous immutable Git SHA:
 
-\`\`\`bash
+```bash
 ./deployment/production/rollback.sh <40-character-git-sha>
 ./deployment/production/healthcheck.sh
-\`\`\`
+```
 
 Do not rebuild an old commit during an incident. A rebuild can resolve dependencies or base-image layers differently from the originally published artifact.
 
