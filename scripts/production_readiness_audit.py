@@ -66,7 +66,7 @@ def main() -> int:
     compose = (
         ROOT / "deployment/docker/docker-compose.prod.yml"
     ).read_text(encoding="utf-8")
-    if "$$SITE_NAME" in compose or "sites/$SITE_NAME" in compose:
+    if "sites/$SITE_NAME" in compose or 'bench --site "$SITE_NAME"' in compose:
         errors.append("docker-compose.prod.yml contains an invalid Compose/Bash site-name expansion.")
     if "sites/$SITE_NAME" not in compose or 'bench --site "$SITE_NAME"' not in compose:
         errors.append("docker-compose.prod.yml must preserve SITE_NAME for the container shell with $ escaping.")
