@@ -5,23 +5,146 @@
   "creation": "2026-09-30 00:00:00.000000",
   "doctype": "DocType",
   "engine": "InnoDB",
-  "field_order": ["requested_by", "business_customer", "warehouse", "priority", "requested_on", "status", "items", "approved_by", "fulfilled_on"],
+  "field_order": [
+    "requested_by",
+    "business_customer",
+    "warehouse",
+    "priority",
+    "requested_on",
+    "status",
+    "items",
+    "approved_by",
+    "fulfilled_on"
+  ],
   "fields": [
-    {"fieldname": "requested_by", "fieldtype": "Link", "in_list_view": 1, "label": "Requested By", "options": "User", "reqd": 1},
-    {"fieldname": "business_customer", "fieldtype": "Link", "label": "Business Customer", "options": "Business Customer"},
-    {"fieldname": "warehouse", "fieldtype": "Link", "in_list_view": 1, "label": "Warehouse", "options": "Warehouse", "reqd": 1},
-    {"fieldname": "priority", "fieldtype": "Select", "in_list_view": 1, "label": "Priority", "options": "Low\nMedium\nHigh", "default": "Medium", "reqd": 1},
-    {"fieldname": "requested_on", "fieldtype": "Datetime", "in_list_view": 1, "label": "Requested On", "reqd": 1},
-    {"fieldname": "status", "fieldtype": "Select", "in_list_view": 1, "label": "Status", "options": "Draft\nSubmitted\nManager Review\nApproved\nFulfilled\nClosed", "default": "Draft", "reqd": 1},
-    {"fieldname": "items", "fieldtype": "Table", "label": "Items", "options": "Stock Request Item", "reqd": 1},
-    {"fieldname": "approved_by", "fieldtype": "Link", "label": "Approved By", "options": "User", "read_only": 1},
-    {"fieldname": "fulfilled_on", "fieldtype": "Datetime", "label": "Fulfilled On", "read_only": 1}
+    {
+      "fieldname": "requested_by",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Requested By",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "business_customer",
+      "fieldtype": "Link",
+      "label": "Business Customer",
+      "options": "Business Customer"
+    },
+    {
+      "fieldname": "warehouse",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Warehouse",
+      "options": "Warehouse",
+      "reqd": 1
+    },
+    {
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Priority",
+      "options": "Low\nMedium\nHigh",
+      "default": "Medium",
+      "reqd": 1
+    },
+    {
+      "fieldname": "requested_on",
+      "fieldtype": "Datetime",
+      "in_list_view": 1,
+      "label": "Requested On",
+      "reqd": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "Draft\nSubmitted\nManager Review\nApproved\nFulfilled\nClosed",
+      "default": "Draft",
+      "reqd": 1
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Stock Request Item",
+      "reqd": 1
+    },
+    {
+      "fieldname": "approved_by",
+      "fieldtype": "Link",
+      "label": "Approved By",
+      "options": "User",
+      "read_only": 1
+    },
+    {
+      "fieldname": "fulfilled_on",
+      "fieldtype": "Datetime",
+      "label": "Fulfilled On",
+      "read_only": 1
+    }
   ],
   "links": [],
   "module": "Business Suite",
   "name": "Stock Request",
   "owner": "Administrator",
-  "permissions": [],
+  "permissions": [
+    {
+      "role": "Business Suite Administrator",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Manager",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Inventory User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Sales User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "report": 1,
+      "print": 1
+    },
+    {
+      "role": "Business Suite Report User",
+      "permlevel": 0,
+      "if_owner": 0,
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
   "sort_field": "modified",
   "sort_order": "DESC",
   "title_field": "name",
