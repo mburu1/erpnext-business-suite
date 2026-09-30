@@ -1,37 +1,62 @@
 # Role-Based Access Control
 
-Business Suite uses Frappe's native RBAC model and adds a small application-level policy layer for record ownership.
+Business Suite uses Frappe's native RBAC model plus application-level authorization for document boundaries.
 
 ## Roles
 
-| Role | Responsibility |
-|---|---|
-| Business Suite Administrator | Full Business Suite administration |
-| Business Suite Manager | Operational management across customers, products and stock requests |
-| Business Suite Sales User | Customer operations and stock-request creation |
-| Business Suite Inventory User | Product and stock-request operations |
-| Business Suite Integration User | Integration execution and audit logs |
-| Business Suite Report User | Read/report access without transactional write access |
+| Role | Business Customer | Business Product | Stock Request | Integration Log |
+|---|---|---|---|---|
+| Business Suite Administrator | Full CRUD + report/export/print/email | Full CRUD + report/export/print | Full CRUD + report/export/print | Full CRUD + report/export/print |
+| Business Suite Manager | Full CRUD + report/export/print/email | Full CRUD + report/export/print | Full CRUD + report/export/print | Read + report/export/print |
+| Business Suite Sales User | Read/write/create + report/export/print/email | Read/report/export/print | Read/write/create + report/print, own-request boundary | No access |
+| Business Suite Inventory User | No access | Full CRUD + report/export/print | Read/write/create + report/export/print | No access |
+| Business Suite Integration User | No access | No access | No access | Read/write/create + report/export/print |
+| Business Suite Report User | Read + report/export/print | Read + report/export/print | Read + report/export/print | Read + report/export/print |
 
-## Enforcement layers
+The permission matrix is defined in business_suite/permissions.py and synchronized during after_install and after_migrate.
 
-1. DocType permissions — CRUD, report, export and print capabilities are synchronized into DocPerm.
-2. API authorization — public API methods call frappe.has_permission() through api/common.py.
-3. Row-level policy — Stock Requests are restricted to the requester unless the user is a Manager, Inventory User or Administrator.
-4. Report roles — standard reports are limited to the roles that need them.
-5. Guest protection — API helpers reject unauthenticated Guest sessions.
+## Authorization layers
 
-## Lifecycle
+1. Role definitions — Business Suite roles are created idempotently.
+2. DocType permissions — the matrix is synchronized to Frappe's native DocPerm records.
+3. API authorization — custom API endpoints check authentication and the required DocType/document permission before reading or mutating data.
+4. Business-logic authorization — document controllers enforce create/write/delete checks as a second boundary around domain operations.
+5. Document-level boundary — Sales users can only read/write/create Stock Requests where requested_by equals the current user. Managers and Inventory users can operate across Stock Requests.
+6. List boundary — permission_query_conditions scopes Stock Request list queries for Sales users.
+7. Workflow boundary — workflow endpoints check write permission and the workflow layer separately verifies the role allowed to perform each transition.
 
-permissions.sync_rbac() is registered for both installation and migration. It is idempotent so repeated migrations do not create duplicate roles or permission rows.
+## CRUD API
 
-After deployment:
+business_suite.api.crud_api exposes an allow-listed CRUD boundary for:
+
+- Business Customer
+- Business Product
+- Stock Request
+- Integration Log
+
+It does not accept arbitrary Frappe DocTypes. Read, create, update and delete operations are checked at both DocType and document level before the native document operation runs.
+
+## Security rules
+
+- Guest cannot call Business Suite APIs.
+- Administrator is the application superuser.
+- Application APIs never use ignore_permissions=True.
+- Direct database APIs such as db_insert and db_update are outside this authorization boundary and must not be used for user-driven mutations.
+- Workflow authorization and business validation remain separate from RBAC.
+
+## Installation / migration
+
+Run:
 
     bench --site <site> migrate
     bench --site <site> clear-cache
 
-Then assign the appropriate Business Suite role to each user from the Frappe User form.
+Then assign Business Suite roles to users through the Frappe User form / Role Permission Manager.
 
-## Security boundary
+## Verification
 
-RBAC is an authorization boundary, not a replacement for business validation or workflow rules. Status transitions, segregation-of-duties rules and integration-specific authorization remain separate concerns.
+Run:
+
+    bench --site <site> run-tests --app business_suite
+
+The authorization suite covers role matrix integrity, CRUD capability boundaries, read-only reporting access, Stock Request row ownership, manager/inventory cross-record access, permission query conditions, Guest API rejection and Administrator access.
