@@ -56,8 +56,8 @@ def test_ci_contains_integration_validation_job() -> None:
     )
 
     assert "Integration validation" in workflow
-    assert "pytest" in workflow
-    assert "test_e2e_contracts.py" in workflow
+    assert "run_e2e_validation.py" in workflow
+    assert "python scripts/run_e2e_validation.py" in workflow
 
 
 @pytest.mark.skipif(
