@@ -8,6 +8,8 @@ This project uses a lightweight, Frappe-native observability layer so production
 
 Every HTTP request emits a structured JSON event through the Frappe logger `business_suite.observability`.
 
+These structured logs are designed for request correlation and operational diagnostics without exposing credentials or request payloads.
+
 The event contains:
 
 - `event` — `http_request`
