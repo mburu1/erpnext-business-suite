@@ -22,6 +22,10 @@ Business Suite uses Frappe's authentication, session management, RBAC, DocType p
 - Duplicate inbound events are detected using the integration log request ID.
 - Configured handler paths are restricted to `business_suite.integrations.*` and reject double-underscore traversal patterns. Arbitrary module paths must not be accepted from site configuration.
 
+### Rate limiting
+
+Rate limiting is enforced at the webhook ingress and health endpoints, with deployment-level Frappe rate limits recommended for broader application traffic.
+
 ### HTTP security headers
 
 The `after_request` hook adds conservative browser headers:
