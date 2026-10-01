@@ -66,10 +66,28 @@ def main() -> int:
     compose = (
         ROOT / "deployment/docker/docker-compose.prod.yml"
     ).read_text(encoding="utf-8")
-    if "sites/$SITE_NAME" in compose or 'bench --site "$SITE_NAME"' in compose:
-        errors.append("docker-compose.prod.yml contains an invalid Compose/Bash site-name expansion.")
-    if "sites/$SITE_NAME" not in compose or 'bench --site "$SITE_NAME"' not in compose:
-        errors.append("docker-compose.prod.yml must preserve SITE_NAME for the container shell with $ escaping.")
+
+    # Compose interpolates $VAR before the container starts. A container shell
+    # variable must therefore be written as $$VAR so the literal $ reaches bash.
+    # Reject the single-dollar form and require the escaped form explicitly.
+    invalid_site_expansions = (
+        "sites/$SITE_NAME" in compose
+        or 'bench --site "$SITE_NAME"' in compose
+    )
+    escaped_site_expansions = (
+        "sites/$$SITE_NAME" in compose
+        and 'bench --site "$$SITE_NAME"' in compose
+    )
+    if invalid_site_expansions:
+        errors.append(
+            "docker-compose.prod.yml contains an invalid single-dollar "
+            "Compose/Bash site-name expansion."
+        )
+    if not escaped_site_expansions:
+        errors.append(
+            "docker-compose.prod.yml must preserve SITE_NAME for the "
+            "container shell with $$ escaping."
+        )
     if "MARIADB_ROOT_PASSWORD" not in compose:
         errors.append("MariaDB root password is not wired through deployment configuration.")
 
@@ -81,8 +99,11 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     if "40-character Git commit SHA" not in deploy:
         errors.append("Production deployment does not enforce immutable Git-SHA image tags.")
-    if "docker pull \"$CUSTOM_IMAGE:$CUSTOM_TAG\"" not in deploy:
-        errors.append("Production deployment must consume the published image instead of rebuilding on the target host.")
+    if 'docker pull "$CUSTOM_IMAGE:$CUSTOM_TAG"' not in deploy:
+        errors.append(
+            "Production deployment must consume the published image "
+            "instead of rebuilding on the target host."
+        )
     if "40-character Git commit SHA" not in rollback:
         errors.append("Rollback does not enforce immutable Git-SHA releases.")
 
