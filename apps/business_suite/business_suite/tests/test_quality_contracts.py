@@ -44,7 +44,11 @@ def test_role_vocabulary_is_separated_from_frappe_runtime():
 
 def test_repository_does_not_contain_obvious_committed_secret_literals():
     source_roots = [APP_ROOT, REPO_ROOT / "scripts"]
-    suspicious = ("BEGIN RSA PRIVATE KEY", "BEGIN OPENSSH PRIVATE KEY", "AKIA")
+    suspicious = (
+        "BEGIN RSA " + "PRIVATE KEY",
+        "BEGIN OPENSSH " + "PRIVATE KEY",
+        "AK" + "IA",
+    )
 
     for root in source_roots:
         for path in root.rglob("*.py"):
