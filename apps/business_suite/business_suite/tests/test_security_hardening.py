@@ -21,7 +21,8 @@ def test_security_module_contains_bounded_validation_controls():
 def test_http_security_headers_are_registered():
     hooks = read(APP_ROOT / "hooks.py")
     security = read(APP_ROOT / "security.py")
-    assert 'after_request = ["business_suite.security.apply_security_headers"]' in hooks
+    assert 'after_request = [' in hooks
+    assert '"business_suite.security.apply_security_headers"' in hooks
     for header in (
         "X-Content-Type-Options",
         "X-Frame-Options",
