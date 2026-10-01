@@ -25,7 +25,7 @@ def test_dashboard_uses_set_based_low_stock_query_and_cache():
 
 def test_inventory_snapshot_is_bounded():
     source = (APP_ROOT / "api" / "inventory_api.py").read_text(encoding="utf-8")
-    assert "limit_page_length=500" in source
+    assert "limit_page_length = min(max(int(limit_page_length or 100), 1), 500)" in source
     assert "LIMIT %(limit_start)s, %(limit_page_length)s" in source
 
 
