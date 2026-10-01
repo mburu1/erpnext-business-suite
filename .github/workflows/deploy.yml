@@ -82,7 +82,7 @@ jobs:
           EOF
 
       - name: Upload release metadata
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: production-image-metadata-${{ github.sha }}
           path: image-metadata.txt
