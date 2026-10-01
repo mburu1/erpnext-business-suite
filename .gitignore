@@ -7,9 +7,4 @@ __pycache__/
 .idea/
 dist/
 build/
-
-# Production deployment secrets
-deployment/docker/.env.production
-
-# Local Docker/Frappe development secrets
-deployment/docker/.env.local
+\n# Production deployment secrets\ndeployment/docker/.env.production\n

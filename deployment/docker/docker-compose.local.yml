@@ -10,8 +10,3 @@ services:
     networks: [erpnext]
     depends_on:
       backend: {condition: service_started}
-
-networks:
-  erpnext:
-    name: erpnext-business-suite_erpnext
-    external: true
